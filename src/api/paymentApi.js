@@ -1,9 +1,7 @@
-// import axios from "axios";
+import axios from "axios";
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 
-const axios = require('axios')
-const axiosLib = (axios && typeof axios === 'object' && 'default' in axios) ? axios.default : axios;
-const apiClient = axiosLib.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
