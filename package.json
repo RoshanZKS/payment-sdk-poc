@@ -1,6 +1,6 @@
 {
   "name": "payment-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React-based payment SDK for merchant applications with secure iframe tokenization",
   "private": false,
   "main": "dist/PaymentSDK.js",
