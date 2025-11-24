@@ -2,7 +2,18 @@
 import * as axiosModule from "axios"
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 
-const axiosInstance = axiosModule.default || axiosModule
+let axiosInstance;
+if (typeof axiosModule.default?.create === 'function') {
+  axiosInstance = axiosModule.default;
+} else if (typeof axiosModule.create === 'function') {
+  axiosInstance = axiosModule;
+} else if (typeof axiosModule.default?.default?.create === 'function') {
+  axiosInstance = axiosModule.default.default;
+} else {
+  // Fallback: try to find axios in the module
+  axiosInstance = axiosModule.default || axiosModule;
+}
+
 const apiClient = axiosInstance.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
