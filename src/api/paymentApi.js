@@ -1,9 +1,9 @@
 import axios from "axios";
+import { API_BASE_URL, API_TIMEOUT } from '../config';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // <-- 10 seconds
+  timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -82,12 +82,12 @@ function getAllSessions() {
   return { ...HARDCODED_TEST_SESSIONS, ...stored };
 }
 
-// Create a payment session (mock)
-// Accepts either (amount, currency) for backward compatibility or merchantDetails object
+/**
+ * Create a payment session
+ * @param {Object} customerDetails - Customer and payment details
+ * @returns {Promise<Object>} Payment session object
+ */
 export async function createPaymentSession(customerDetails) {
-  // Simulate API delay
-  console.log('Creating payment session with details:', customerDetails);
-
   const payload = {
   "orderId": customerDetails.orderId,
   "amount": customerDetails.amount,
@@ -99,49 +99,42 @@ export async function createPaymentSession(customerDetails) {
   }
 }
 
-try {  
-  
+  try {
     const response = await apiClient.post('/payment/session/create', payload);
-    console.log('API response:', response);
     const session = response.data;
     return session;
-  } catch (e) {
-    // Ignore
-    console.error('payment session error', e);
+  } catch (error) {
+    console.error('Payment session creation error:', error.message);
+    throw new Error(error.response?.data?.message || 'Failed to create payment session');
   }
-  
-  
-  return session;
 }
 
-// Get payment session details
+/**
+ * Get payment session details
+ * @param {string} sessionId - Session ID
+ * @returns {Promise<Object>} Session details
+ */
 export async function getPaymentSession(sessionId) {
-  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 200));
   
   const allSessions = getAllSessions();
   
   if (allSessions[sessionId]) {
-    console.log('Found session:', sessionId, allSessions[sessionId]);
     return allSessions[sessionId];
   }
   
-  console.error('Session not found:', sessionId);
-  console.log('Available sessions:', Object.keys(allSessions));
-  
-  // Return a default test session if not found (for testing)
-  console.warn('Session not found, returning default test session');
+  // Return a default test session if not found (for development/testing)
   return HARDCODED_TEST_SESSIONS['test-session-1'];
 }
 
-// Create payment token from card data (mock)
-// This sends card data to backend and returns a token
+/**
+ * Create payment token from card data
+ * @param {string} sessionId - Session ID
+ * @param {Object} paymentData - Payment form data
+ * @returns {Promise<boolean>} Success status
+ */
 export async function createPaymentToken(sessionId, paymentData) {
-  // Simulate API delay
-  
-  // Extract card number (remove spaces)
   const cardNumber = paymentData.cardNumber ? paymentData.cardNumber.replace(/\s/g, '') : '';
-  const cardLast4 = cardNumber.slice(-4);
   
   const payload = {
   "recordLocator": "ABC123",
@@ -168,24 +161,29 @@ export async function createPaymentToken(sessionId, paymentData) {
 
   try {
     const response = await apiClient.post('/payment/authenticate', payload);
-    console.log('API response:', response);
     const result = response.data.result.resultCode;
     if (result === 'Success') {
-      return true
+      return true;
     }
-  } catch (e) {
-    console.error('create payment token error', e);
+    throw new Error('Payment authentication failed');
+  } catch (error) {
+    console.error('Payment token creation error:', error.message);
+    throw new Error(error.response?.data?.message || 'Failed to create payment token');
   }
-  return
 }
 
-// Helper function to get test session (for easy testing)
+/**
+ * Get test session (for development/testing)
+ * @param {string} sessionId - Session ID
+ * @returns {Object} Test session
+ */
 export function getTestSession(sessionId = 'test-session-1') {
   return HARDCODED_TEST_SESSIONS[sessionId] || HARDCODED_TEST_SESSIONS['test-session-1'];
 }
 
-// Clear all sessions (for testing)
+/**
+ * Clear all sessions (for testing/development)
+ */
 export function clearAllSessions() {
   localStorage.removeItem(STORAGE_KEY);
-  console.log('All sessions cleared');
 }

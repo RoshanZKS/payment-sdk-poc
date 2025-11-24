@@ -9,7 +9,6 @@ export default function PaymentIframe({ sessionId, onClose, onTokenReceived, onP
   useEffect(() => {
     const handleMessage = (event) => {
       // In production, validate event.origin for security
-      console.log('Received message from iframe:', event);
       if (event.data && event.data.type === 'TOKEN_CREATED') {
         const tokenData = {
           token: event.data.token,
@@ -67,14 +66,14 @@ export default function PaymentIframe({ sessionId, onClose, onTokenReceived, onP
   };
 
   // Create iframe URL - using hash to pass sessionId
-  // The iframe loads /index.html with payment mode hash-
+  // The iframe loads /index.html with payment mode hash
   const iframeUrl = `/index.html#payment?sessionId=${sessionId}`;
-  console.log('token result:', tokenResult);
+  
   if (tokenResult) {
     return (
       <div className="payment-iframe-container">
         <div className="payment-result">
-          {/* {tokenResult.success ? (
+          {tokenResult.success ? (
             <>
               <div className="success-icon">✓</div>
               <h2>Token Created!</h2>
@@ -96,14 +95,7 @@ export default function PaymentIframe({ sessionId, onClose, onTokenReceived, onP
                 Close
               </button>
             </>
-          )} */}
-          <div className="success-icon">✓</div>
-              <h2>SUCCESS</h2>
-              <p className="success-message">Payment token has been created successfully</p>
-              
-              <button onClick={handleClose} className="close-button">
-                Close
-              </button>
+          )}
         </div>
       </div>
     );

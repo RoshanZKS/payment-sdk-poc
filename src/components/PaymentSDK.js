@@ -43,7 +43,6 @@ export default function PaymentSDK({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log('Customer',customer)
   // Validate required props
   useEffect(() => {
     if (!merchantId) {
@@ -58,10 +57,9 @@ export default function PaymentSDK({
   }, [merchantId, apiKey, amount]);
 
   const handleStartPayment = useCallback(async () => {
-
     setLoading(true);
     setError(null);
-    console.log('Starting payment with:')
+    
     try {
       // Create payment session with merchant details
       const session = await createPaymentSession({
@@ -70,12 +68,10 @@ export default function PaymentSDK({
         currency,
         orderId,
       });
-      console.log('Created session:', session);
       setSessionId(session.sessionId);
     } catch (err) {
       const errorMessage = err.message || "Failed to initialize payment. Please try again.";
       setError(errorMessage);
-      console.log('Payment initialization error:', errorMessage);
       if (onPaymentError) {
         onPaymentError(errorMessage);
       }
@@ -103,7 +99,6 @@ export default function PaymentSDK({
   };
 
   const handlePaymentError = (errorMessage) => {
-    console.log('Payment error in SDK:', errorMessage);
     setError(errorMessage);
     if (onPaymentError) {
       onPaymentError(errorMessage);

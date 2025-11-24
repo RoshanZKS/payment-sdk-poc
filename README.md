@@ -1,70 +1,299 @@
-# Getting Started with Create React App
+# Payment SDK
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based payment SDK for merchant applications with secure iframe tokenization. This SDK provides a seamless and secure way to collect payment information from customers while maintaining PCI compliance.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔒 **Secure Payment Processing** - Iframe-based tokenization keeps sensitive card data isolated
+- ⚡ **Easy Integration** - Simple React component integration with minimal configuration
+- 🎨 **Customizable UI** - Pre-built, modern payment form with responsive design
+- 🔐 **PCI Compliant** - Card data never touches your servers
+- 📱 **Mobile Responsive** - Works seamlessly across all device sizes
+- ✅ **Form Validation** - Built-in validation for card numbers, expiry dates, CVV, and more
 
-### `npm start`
+## Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install payment-sdk
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Quick Start
 
-### `npm test`
+### Basic Usage
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```javascript
+import React from 'react';
+import { PaymentSDK } from 'payment-sdk';
 
-### `npm run build`
+function CheckoutPage() {
+  const handleTokenReceived = (tokenData) => {
+    console.log('Payment token received:', tokenData);
+    // Send token to your backend to complete the payment
+    // Example: await fetch('/api/complete-payment', { 
+    //   method: 'POST', 
+    //   body: JSON.stringify(tokenData) 
+    // });
+  };
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  const handlePaymentError = (error) => {
+    console.error('Payment error:', error);
+    // Handle error appropriately
+  };
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  return (
+    <PaymentSDK
+      merchantId="your_merchant_id"
+      apiKey="your_api_key"
+      amount={5000}  // Amount in cents ($50.00)
+      currency="USD"
+      customer={{
+        name: "John Doe",
+        email: "john.doe@example.com"
+      }}
+      orderId="ORDER-123"
+      description="Order #123 - Premium Package"
+      onTokenReceived={handleTokenReceived}
+      onPaymentError={handlePaymentError}
+    />
+  );
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export default CheckoutPage;
+```
 
-### `npm run eject`
+## Component Props
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Required Props
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+| Prop | Type | Description |
+|------|------|-------------|
+| `merchantId` | `string` | Your unique merchant identifier |
+| `apiKey` | `string` | Your API key for authentication |
+| `amount` | `number` | Payment amount in cents (e.g., 5000 for $50.00) |
+| `currency` | `string` | Currency code (e.g., "USD", "EUR", "GBP") |
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Optional Props
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `customer` | `object` | `{}` | Customer information (`name`, `email`, `phone`) |
+| `orderId` | `string` | Auto-generated | Your order/transaction ID |
+| `description` | `string` | `""` | Payment description |
+| `onTokenReceived` | `function` | `null` | Callback when payment token is created successfully |
+| `onPaymentError` | `function` | `null` | Callback when an error occurs |
+| `onClose` | `function` | `null` | Callback when payment form is closed |
+| `autoOpen` | `boolean` | `false` | Automatically open payment form on mount |
+| `className` | `string` | `""` | Additional CSS classes for styling |
 
-## Learn More
+## API Configuration
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The SDK communicates with your payment backend. Configure the API base URL in `src/api/paymentApi.js`:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```javascript
+const API_BASE_URL = 'https://your-payment-api.com/api/v1';
+```
 
-### Code Splitting
+### Required Backend Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Your backend should implement these endpoints:
 
-### Analyzing the Bundle Size
+#### 1. Create Payment Session
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+**POST** `/payment/session/create`
 
-### Making a Progressive Web App
+Request:
+```json
+{
+  "orderId": "ORDER-123",
+  "amount": 5000,
+  "currency": "USD",
+  "customer": {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890"
+  }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Response:
+```json
+{
+  "sessionId": "sess_abc123xyz",
+  "amount": 5000,
+  "currency": "USD",
+  "orderId": "ORDER-123",
+  "customer": {
+    "name": "John Doe",
+    "email": "john.doe@example.com"
+  }
+}
+```
 
-### Advanced Configuration
+#### 2. Authenticate Payment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+**POST** `/payment/authenticate`
 
-### Deployment
+Request:
+```json
+{
+  "recordLocator": "ABC123",
+  "paymentDetail": {
+    "paymentReference": "PAY123456",
+    "formOfPayment": {
+      "type": "CC",
+      "fopCode": "VI"
+    },
+    "paymentCard": {
+      "cardCode": "VI",
+      "cardNumber": "411111######1111",
+      "cardSecurityCode": "###",
+      "expireDate": "122025",
+      "cardHolderName": {
+        "name": "TESTCARD",
+        "firstName": "TESTCARD",
+        "lastName": ""
+      }
+    },
+    "amount": 499.00
+  }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Response:
+```json
+{
+  "result": {
+    "resultCode": "Success"
+  }
+}
+```
 
-### `npm run build` fails to minify
+## Workflow
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. **Merchant Integration**: Merchant adds the `PaymentSDK` component to their checkout page
+2. **Session Creation**: When user clicks "Pay Now", SDK creates a payment session with your backend
+3. **Secure Form**: Payment form loads in an isolated iframe for security
+4. **Token Generation**: Card details are submitted to create a payment token
+5. **Token Callback**: Token is returned to merchant via `onTokenReceived` callback
+6. **Payment Completion**: Merchant sends token to their backend to complete the payment
+
+## Security
+
+- **Iframe Isolation**: Card data is collected in an isolated iframe, never touching the parent page
+- **Tokenization**: Card details are converted to tokens before being sent to your server
+- **PCI Compliance**: By using this SDK, you reduce PCI compliance scope
+- **HTTPS Required**: Always use HTTPS in production
+- **Origin Validation**: In production, validate message origins for iframe communication
+
+## Development & Testing
+
+### Test Card Numbers
+
+Use these test card numbers during development:
+
+| Card Type | Number | CVV | Expiry |
+|-----------|--------|-----|--------|
+| Visa | 4111 1111 1111 1111 | 123 | Any future date |
+| Mastercard | 5555 5555 5555 4444 | 123 | Any future date |
+| Amex | 3782 822463 10005 | 1234 | Any future date |
+
+### Building the SDK
+
+```bash
+# Build the SDK for distribution
+npm run build:sdk
+
+# Output will be in the `dist/` directory
+```
+
+## Error Handling
+
+The SDK provides error callbacks for handling various error scenarios:
+
+```javascript
+const handlePaymentError = (error) => {
+  switch(error) {
+    case 'merchantId is required':
+      // Handle missing merchant ID
+      break;
+    case 'amount must be a positive number':
+      // Handle invalid amount
+      break;
+    case 'Failed to initialize payment. Please try again.':
+      // Handle initialization failure
+      break;
+    default:
+      // Handle generic errors
+      console.error('Payment error:', error);
+  }
+};
+```
+
+## Styling
+
+The SDK includes pre-built styles that can be customized. You can:
+
+1. Use the `className` prop to add custom classes
+2. Override CSS variables in your application
+3. Modify the CSS files in `src/components/` before building
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+## TypeScript Support
+
+TypeScript definitions are planned for a future release. For now, you can create a declaration file:
+
+```typescript
+declare module 'payment-sdk' {
+  export interface PaymentSDKProps {
+    merchantId: string;
+    apiKey: string;
+    amount: number;
+    currency: string;
+    customer?: {
+      name?: string;
+      email?: string;
+      phone?: string;
+    };
+    orderId?: string;
+    description?: string;
+    onTokenReceived?: (tokenData: any) => void;
+    onPaymentError?: (error: string) => void;
+    onClose?: () => void;
+    autoOpen?: boolean;
+    className?: string;
+  }
+
+  export const PaymentSDK: React.FC<PaymentSDKProps>;
+}
+```
+
+## Contributing
+
+This SDK is designed for merchant integration. For bugs or feature requests, please contact the development team.
+
+## License
+
+Proprietary - All rights reserved
+
+## Support
+
+For technical support or questions, please contact:
+- Email: support@payment-sdk.com
+- Documentation: https://docs.payment-sdk.com
+
+## Changelog
+
+### Version 1.0.0
+- Initial release
+- Iframe-based payment form
+- Tokenization support
+- Mobile responsive design
+- Form validation
+- Error handling

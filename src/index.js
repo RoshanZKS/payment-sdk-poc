@@ -1,17 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import PaymentFormPage from './components/PaymentFormPage';
+import DemoApp from './DemoApp';
+
+// Check if we're in iframe mode or demo mode
+const isIframeMode = window.location.hash.includes('payment');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    {isIframeMode ? <PaymentFormPage /> : <DemoApp />}
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

@@ -21,23 +21,17 @@ export default function PaymentForm({ sessionId, onTokenCreated, onPaymentError 
 
   const loadSession = async () => {
     try {
-      console.log('Loading session:', sessionId);
       const sessionData = await getPaymentSession(sessionId);
-      console.log('Session loaded:', sessionData);
       setSession(sessionData);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to load session:', error);
-      console.error('Session ID was:', sessionId);
-      // Try to use a test session as fallback
+      // Try to use a test session as fallback for development
       try {
         const { getTestSession } = await import('../api/paymentApi');
         const testSession = getTestSession();
-        console.log('Using fallback test session:', testSession);
         setSession(testSession);
         setLoading(false);
       } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
         setLoading(false);
       }
     }
