@@ -1,20 +1,9 @@
 // import axios from "axios";
-import * as axiosModule from "axios"
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 
-let axiosInstance;
-if (typeof axiosModule.default?.create === 'function') {
-  axiosInstance = axiosModule.default;
-} else if (typeof axiosModule.create === 'function') {
-  axiosInstance = axiosModule;
-} else if (typeof axiosModule.default?.default?.create === 'function') {
-  axiosInstance = axiosModule.default.default;
-} else {
-  // Fallback: try to find axios in the module
-  axiosInstance = axiosModule.default || axiosModule;
-}
-
-const apiClient = axiosInstance.create({
+const axios = require('axios')
+const axiosLib = (axios && typeof axios === 'object' && 'default' in axios) ? axios.default : axios;
+const apiClient = axiosLib.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
