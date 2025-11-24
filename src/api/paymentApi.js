@@ -1,15 +1,40 @@
-import * as axios from "axios";
 
-
+// Use native Fetch API - no dependencies needed!
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 
-const apiClient = axios.default.create({
-  baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+// Create API client using native fetch
+const apiClient = {
+  async post(url, data) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}${url}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || HTTP `${response.status}: ${response.statusText}`);
+      }
+      
+      return { data: await response.json() };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
+    }
+  }
+}
 
 
 // Mock payment API with sample JSON data
